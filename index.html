@@ -160,6 +160,92 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hackedsb.github.io/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Art1st">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Art1st's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/" class="post-title-link" itemprop="url">对H站的一次渗透</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-08-13 10:23:23 / 修改时间：10:31:53" itemprop="dateCreated datePublished" datetime="2020-08-13T10:23:23+08:00">2020-08-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">渗透测试</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>起因看到橘子师傅在Vx群发了个H站，看他搞下来绝对自己也试试</p>
+<p>打开网站</p>
+<p><img src="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/1597283800663-fc09f5ba-0b29-4b7a-b155-da11c983245d.png" alt="Penetration-1.png"></p>
+<p>打开站点提示要手机端访问；利用谷歌的插件改下UA头</p>
+<p><img src="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/1597284380847-ab388063-59a3-4e57-ba00-e359b237b805.png" alt="Penetration-1.png"><br>成功访问<br>注册个账号进去看看，</p>
+<p>在视频列表的url上加个引号</p>
+<p><img src="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/1597284478065-82c97763-1070-4960-bf4f-04a66a34b60d.png" alt="Penetration-1.png"></p>
+<p>看到这报错页面，在一套魅思cms看到过，并且and 1=1 1=2 页面回显不同，猜测有注入</p>
+<p>上工具</p>
+<p><img src="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/1597284605573-aee3d4fd-ea54-4524-abf7-55b72607577f.png" alt="Penetration-1.png"></p>
+<p>获取后台账号密码时候</p>
+<p><img src="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/1597284685520-8be4c16e-8a03-4039-ada8-5af535935c77.png" alt="Penetration-1.png"></p>
+<p>emmmm what the fuck<br>知道是魅思cms，了解到是 基于thinkphp5开发，打一波RCE</p>
+<blockquote>
+<p><a href="https://host//index.php?s=captcha" target="_blank" rel="noopener">https://host//index.php?s=captcha</a><br>data:_method=__construct&amp;filter[]=system&amp;method=GET&amp;get[]=whoami</p>
+</blockquote>
+<p><img src="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/1597285091307-ac8bd4c8-c30f-44b1-80d0-257c3e751159.png" alt="Penetration-1.png"></p>
+<p>rce成功,<br>写个shell</p>
+<p><img src="/2020/08/13/%E5%AF%B9H%E7%AB%99%E7%9A%84%E4%B8%80%E6%AC%A1%E6%B8%97%E9%80%8F/1597285320650-8db6e794-5837-4112-8ebf-cf44a7cda65c.png" alt="Penetration-1.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://hackedsb.github.io/2020/07/27/%E4%B8%80%E6%AC%A1%E5%B8%B8%E8%A7%84%E6%B8%97%E9%80%8F+%E6%8F%90%E6%9D%83/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -867,83 +953,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://hackedsb.github.io/2020/07/27/%E7%BD%91%E9%BC%8E%E6%9D%AF-2020-%E6%9C%B1%E9%9B%80%E7%BB%84phpweb/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="Art1st">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Art1st's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/07/27/%E7%BD%91%E9%BC%8E%E6%9D%AF-2020-%E6%9C%B1%E9%9B%80%E7%BB%84phpweb/" class="post-title-link" itemprop="url">网鼎杯 2020 朱雀组phpweb</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-07-27 14:45:32 / 修改时间：15:10:44" itemprop="dateCreated datePublished" datetime="2020-07-27T14:45:32+08:00">2020-07-27</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><img src="/2020/07/27/%E7%BD%91%E9%BC%8E%E6%9D%AF-2020-%E6%9C%B1%E9%9B%80%E7%BB%84phpweb/CTF-wp-1.png" alt="CTF-wp-1.png"></p>
-<p>看到一张图片，众生皆懒狗。<br>Ctrl+U 发现</p>
-<p><img src="/2020/07/27/%E7%BD%91%E9%BC%8E%E6%9D%AF-2020-%E6%9C%B1%E9%9B%80%E7%BB%84phpweb/CTF-wp-2.png" alt="CTF-wp-2.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/07/27/%E7%BD%91%E9%BC%8E%E6%9D%AF-2020-%E6%9C%B1%E9%9B%80%E7%BB%84phpweb/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1015,7 +1024,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">12</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
